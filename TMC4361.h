@@ -24,6 +24,7 @@
 #define TMC4361_INTERRUPT_CONFIG_REGISTER 0x0d
 #define TMC4361_EVENTS_REGISTER 0x0e
 #define TMC4361_STATUS_REGISTER 0x0f
+#define TMC4361_STP_LENGTH_ADD 0x10
 #define TMC4361_START_OUT_ADD_REGISTER 0x11
 #define TMC4361_GEAR_RATIO_REGISTER 0x12
 #define TMC4361_START_DELAY_REGISTER 0x13
@@ -65,6 +66,7 @@
 #define TMC4361_ENCODER_INPUT_RESOLUTION_REGISTER 0x54
 #define TMC4361_COVER_LOW_REGISTER 0x6c
 #define TMC4361_COVER_HIGH_REGISTER 0x6d
+#define TMC4361_VERSION_REGISTER 0x7f
 
 class TMC4361
 {
@@ -80,14 +82,84 @@ public:
     S_SHAPED_RAMP = 0x02
   };
 
+  //See Status Events Register description for details
+  enum EventType {
+    TARGET_REACHED = 0,
+    POS_COMP_REACHED,
+    VEL_REACHED,
+    VEL_STATE_ZERO,
+    VEL_STATE_POS,
+    VEL_STATE_NEG,
+    RAMP_STATE_ACCEL_ZERO,
+    RAMP_STATE_ACCEL_POS,
+    RAMP_STATE_ACCEL_NEG,
+    MAX_PHASE_TRAP,
+    FROZEN,
+    STOPL,
+    STOPR,
+    VSTOPL_ACTIVE,
+    VSTOPR_ACTIVE,
+    HOME_ERROR,
+    XLATCH_DONE,
+    FS_ACTIVE,
+    ENC_FAIL,
+    N_ACTIVE,
+    ENC_DONE,
+    SER_ENC_DATA_FAIL,
+    SER_DATA_DONE = 23,
+    SERIAL_ENC_FLAG,
+    COVER_DONE,
+    ENC_VEL_ZERO,
+    CL_MAX,
+    CL_FIT,
+    STOP_ON_STALL,
+    MOTOR_EV,
+    RST_EV
+  };
+
+  //See Status Flags Register description for details
+  enum FlagType {
+    TARGET_REACHED_F = 0,
+    POS_COMP_REACHED_F,
+    VEL_REACHED_F,
+    VEL_STATE_F0,
+    VEL_STATE_F1,
+    RAMP_STATE_F0,
+    RAMP_STATE_F1,
+    STOPL_ACTIVE_F,
+    STOPR_ACTIVE_F,
+    VSTOPL_ACTIVE_F,
+    VSTOPR_ACTIVE_F,
+    ACTIVE_STALL_F,
+    HOME_ERROR_F,
+    FS_ACTIVE_F,
+    ENC_FAIL_F,
+    N_ACTIVE_F,
+    ENC_LATCH_F,
+  };
+
   TMC4361();
   void begin(long clockFreq, int csPin);
   void begin(long clockFreq, int csPin, int intPin);
   void begin(long clockFreq, int csPin, int intPin, int startPin);
 
-  //TODO events / status configuration
+  /* Check runtime flags (as-is condition, as opposed to events that indicate a change since the last read) */
+  bool checkFlag(FlagType flag);
+  bool isTargetReached();
 
-  //TODO output configuration
+  //TODO interrupt configuration ; event handling
+
+  /* Set step/dir outputs polarity
+   * if stepInverted is true, LOW indicates an active step
+   * if dirInverted is true, HIGH indicates negative direction
+   */
+  void setOutputsPolarity(bool stepInverted, bool dirInverted);
+
+  /* Set output interface timings :
+   * step duration in microseconds
+   * dir setup time in microseconds (no step will be issued for this duration after a direction change)
+   */
+  void setOutputTimings(int stepWidth, int dirSetupTime);
 
   /* Ramp generator commands */
   void setRampMode(RampMode mode, RampType type);
@@ -97,11 +169,6 @@ public:
 
   /* Set the current internal position (in steps) */
   void setCurrentPosition(long position);
-
-  /* Set the target position
-   * /!\ Set all other motion profile parameters before
-   */
-  void setTargetPosition(long position);
 
   /* Return the current speed (in steps / second) */
   float getCurrentSpeed();
@@ -123,8 +190,17 @@ public:
   /* Set the bow values for S-shaped ramps (in steps / second^3). */
   void setBowValues(long bow1, long bow2, long bow3, long bow4);
 
+  /* Set the target position
+   * /!\ Set all other motion profile parameters before
+   */
+  void setTargetPosition(long position);
+
+  //TODO utility functions (stop)
 
 private:
+  const static int _defaultStepLength = 5; //us
+  const static int _defaultDirSetupTime = 5; //us
+
   long _clockFreq; //TMC4361 clock frequency (Hz)
   int _csPin; //Chip Select pin number
   int _startPin; //Start signal pin number
@@ -134,7 +210,6 @@ private:
 
   SPISettings _spiSettings;
 
-  //TODO are multi-register versions needed ?
   void writeRegister(const byte address, const long data);
   long readRegister(const byte address);
   long spiTransfer(const byte address, const long data);

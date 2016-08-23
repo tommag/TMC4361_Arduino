@@ -47,11 +47,13 @@ void loop()
 {
   Serial.println(tmc.getCurrentSpeed());
 
-  long currentPos = tmc.getCurrentPosition();
-  if (currentPos == 1000)
-    tmc.setTargetPosition(-1000);
-  else if (currentPos == -1000)
-    tmc.setTargetPosition(1000);
+  if (tmc.isTargetReached())
+  {
+    if (tmc.getCurrentPosition() < 0)
+      tmc.setTargetPosition(1000);
+    else
+      tmc.setTargetPosition(-1000);
+  }
 
   delay(50);
 }

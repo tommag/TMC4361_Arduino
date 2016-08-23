@@ -31,7 +31,7 @@ void TMC4361::begin(long clockFreq, int csPin, int intPin, int startPin)
 
   SPI.begin(); //Init SPI hardware
   _spiSettings = SPISettings(clockFreq/4, MSBFIRST, SPI_MODE3);
-  //TODO SPI.usingInterrupt ? If SPI transactions are performed from the interrupt.
+  SPI.usingInterrupt(intPin);
 
   digitalWrite(_csPin, HIGH);
   pinMode(_csPin, OUTPUT);
@@ -39,7 +39,7 @@ void TMC4361::begin(long clockFreq, int csPin, int intPin, int startPin)
   if (_intPin > -1)
   {
     pinMode(_intPin, INPUT);
-    //TODO attachInterrupt
+    //TODO attachInterrupt ?
   }
 
   if (_startPin > -1)
@@ -48,8 +48,38 @@ void TMC4361::begin(long clockFreq, int csPin, int intPin, int startPin)
   }
 
   writeRegister(TMC4361_CLK_FREQ_REGISTER, clockFreq);
+  setOutputTimings(_defaultStepLength, _defaultDirSetupTime);
 
-  //TODO configure output ; FREEZE register
+  //TODO init FREEZE register
+}
+
+bool TMC4361::checkFlag(TMC4361::FlagType flag)
+{
+  return bitRead(readRegister(TMC4361_STATUS_REGISTER), flag);
+}
+
+bool TMC4361::isTargetReached()
+{
+  return checkFlag(TARGET_REACHED_F);
+}
+
+void TMC4361::setOutputsPolarity(bool stepInverted, bool dirInverted)
+{
+  long generalConfigReg = readRegister(TMC4361_GENERAL_CONFIG_REGISTER);
+
+  bitWrite(generalConfigReg, 3, stepInverted);
+  bitWrite(generalConfigReg, 5, dirInverted);
+
+  writeRegister(TMC4361_GENERAL_CONFIG_REGISTER, generalConfigReg);
+}
+
+void TMC4361::setOutputTimings(int stepWidth, int dirSetupTime)
+{
+  long registerValue =
+    ((stepWidth * _clockFreq / 1000000L - 1) & 0xFFFF) |
+    (((dirSetupTime * _clockFreq / 1000000L) & 0xFFFF) << 16);
+
+  writeRegister(TMC4361_STP_LENGTH_ADD, registerValue);
 }
 
 void TMC4361::setRampMode(TMC4361::RampMode mode, TMC4361::RampType type)
