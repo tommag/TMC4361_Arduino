@@ -200,7 +200,8 @@ public:
    */
   void setTargetPosition(long position);
 
-  //TODO utility functions (stop)
+  /* Stop the current motion according to the set ramp mode and motion parameters. The max speed is set to 0 but the target position stays unchanged. */
+  void stop();
 
 private:
   const static int _defaultStepLength = 5; //us

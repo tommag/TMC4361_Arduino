@@ -126,11 +126,6 @@ void TMC4361::setCurrentPosition(long position)
   writeRegister(TMC4361_X_ACTUAL_REGISTER, position);
 }
 
-void TMC4361::setTargetPosition(long position)
-{
-  writeRegister(TMC4361_X_TARGET_REGISTER, position);
-}
-
 float TMC4361::getCurrentSpeed()
 {
   return (float)readRegister(TMC4361_V_ACTUAL_REGISTER);
@@ -167,6 +162,16 @@ void TMC4361::setBowValues(long bow1, long bow2, long bow3, long bow4)
   writeRegister(TMC4361_BOW_2_REGISTER, abs(bow2) & 0xFFFFFF);
   writeRegister(TMC4361_BOW_3_REGISTER, abs(bow3) & 0xFFFFFF);
   writeRegister(TMC4361_BOW_4_REGISTER, abs(bow4) & 0xFFFFFF);
+}
+
+void TMC4361::setTargetPosition(long position)
+{
+  writeRegister(TMC4361_X_TARGET_REGISTER, position);
+}
+
+void TMC4361::stop()
+{
+  setMaxSpeed(0.0);
 }
 
 void TMC4361::writeRegister(const byte address, const long data)
