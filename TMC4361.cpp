@@ -14,20 +14,26 @@ TMC4361::TMC4361()
 
 void TMC4361::begin(long clockFreq, int csPin)
 {
-  begin(clockFreq, csPin, -1, -1);
+  begin(clockFreq, csPin, -1, -1, -1);
 }
 
 void TMC4361::begin(long clockFreq, int csPin, int intPin)
 {
-  begin(clockFreq, csPin, intPin, -1);
+  begin(clockFreq, csPin, intPin, -1, -1);
 }
 
 void TMC4361::begin(long clockFreq, int csPin, int intPin, int startPin)
+{
+  begin(clockFreq, csPin, intPin, startPin, -1);
+}
+
+void TMC4361::begin(long clockFreq, int csPin, int intPin, int startPin, int rstPin)
 {
   _clockFreq = clockFreq;
   _csPin = csPin;
   _intPin = intPin;
   _startPin = startPin;
+  _rstPin = rstPin;
 
   SPI.begin(); //Init SPI hardware
   _spiSettings = SPISettings(clockFreq/4, MSBFIRST, SPI_MODE3);
@@ -47,10 +53,33 @@ void TMC4361::begin(long clockFreq, int csPin, int intPin, int startPin)
     pinMode(_startPin, INPUT);
   }
 
+  if (_rstPin > -1)
+  {
+    digitalWrite(_rstPin, HIGH);
+    pinMode(_rstPin, OUTPUT);
+  }
+
+  reset();
+
   writeRegister(TMC4361_CLK_FREQ_REGISTER, clockFreq);
   setOutputTimings(_defaultStepLength, _defaultDirSetupTime);
 
   //TODO init FREEZE register
+}
+
+void TMC4361::reset()
+{
+  if (_rstPin > -1)
+  {
+    digitalWrite(_rstPin, LOW);
+    delay(2);
+    digitalWrite(_rstPin, HIGH);
+  }
+  else
+  {
+    //Write magic value to the reset register
+    writeRegister(TMC4361_RESET_CLK_GATING_REGISTER, 0x525354 << 8);
+  }
 }
 
 bool TMC4361::checkFlag(TMC4361::FlagType flag)

@@ -62,6 +62,7 @@
 #define TMC4361_SH_BOW_3_REGISTER 0x4A
 #define TMC4361_SH_BOW_4_REGISTER 0x4B
 #define TMC4361_SH_RAMP_MODE_REGISTER 0x4C
+#define TMC4361_RESET_CLK_GATING_REGISTER 0x4f
 #define TMC4361_ENCODER_POSITION_REGISTER 0x50
 #define TMC4361_ENCODER_INPUT_RESOLUTION_REGISTER 0x54
 #define TMC4361_COVER_LOW_REGISTER 0x6c
@@ -142,6 +143,10 @@ public:
   void begin(long clockFreq, int csPin);
   void begin(long clockFreq, int csPin, int intPin);
   void begin(long clockFreq, int csPin, int intPin, int startPin);
+  void begin(long clockFreq, int csPin, int intPin, int startPin, int rstPin);
+
+  /* HW or SW reset */
+  void reset();
 
   /* Check runtime flags (as-is condition, as opposed to events that indicate a change since the last read) */
   bool checkFlag(FlagType flag);
@@ -205,6 +210,7 @@ private:
   int _csPin; //Chip Select pin number
   int _startPin; //Start signal pin number
   int _intPin; //Interrupt line pin number
+  int _rstPin; //Reset pin number
 
   byte _spiStatus; //Contents of the status bits SPI_STATUS updated on each SPI transaction
 
