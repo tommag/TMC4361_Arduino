@@ -195,6 +195,9 @@ public:
   /* Set the bow values for S-shaped ramps (in steps / second^3). */
   void setBowValues(long bow1, long bow2, long bow3, long bow4);
 
+  /* Get the target position in steps */
+  long getTargetPosition();
+
   /* Set the target position
    * /!\ Set all other motion profile parameters before
    */

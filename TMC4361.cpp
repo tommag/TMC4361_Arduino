@@ -164,6 +164,11 @@ void TMC4361::setBowValues(long bow1, long bow2, long bow3, long bow4)
   writeRegister(TMC4361_BOW_4_REGISTER, abs(bow4) & 0xFFFFFF);
 }
 
+long TMC4361::getTargetPosition()
+{
+  return readRegister(TMC4361_X_TARGET_REGISTER);
+}
+
 void TMC4361::setTargetPosition(long position)
 {
   writeRegister(TMC4361_X_TARGET_REGISTER, position);
