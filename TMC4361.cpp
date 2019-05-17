@@ -89,7 +89,7 @@ void TMC4361::reset()
 
 bool TMC4361::checkFlag(TMC4361::FlagType flag)
 {
-  return bitRead(readRegister(TMC4361_STATUS_REGISTER), flag);
+  return readRegisterBit(TMC4361_STATUS_REGISTER, flag);
 }
 
 bool TMC4361::isTargetReached()
@@ -104,7 +104,7 @@ void TMC4361::clearEvents()
 
 bool TMC4361::checkEvent(EventType event)
 {
-  bool value = bitRead(readRegister(TMC4361_EVENTS_REGISTER), event);
+  bool value = readRegisterBit(TMC4361_EVENTS_REGISTER, event);
   
   if (value)
     writeRegister(TMC4361_EVENTS_REGISTER, 1 << event);
@@ -208,6 +208,25 @@ long TMC4361::readRegister(const byte address)
 {
   spiTransfer(address & 0x7F, 0); //Dummy call to load the read address
   return spiTransfer(address & 0x7F, 0);
+}
+
+void TMC4361::setRegisterBit(const byte address, const byte bit)
+{
+  uint32_t value = readRegister(address);
+  bitSet(value, bit);
+  writeRegister(address, value);
+}
+
+void TMC4361::clearRegisterBit(const byte address, const byte bit)
+{
+  uint32_t value = readRegister(address);
+  bitClear(value, bit);
+  writeRegister(address, value);
+}
+
+bool TMC4361::readRegisterBit(const byte address, const byte bit)
+{
+  return bitRead(readRegister(address), bit);
 }
 
 long TMC4361::spiTransfer(const byte address, const long data)

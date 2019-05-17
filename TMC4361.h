@@ -244,6 +244,10 @@ public:
 
   void writeRegister(const byte address, const long data);
   long readRegister(const byte address);
+  
+  void setRegisterBit(const byte address, const byte bit);
+  void clearRegisterBit(const byte address, const byte bit);
+  bool readRegisterBit(const byte address, const byte bit);
 
 private:
   const static int _defaultStepLength = 5; //us
