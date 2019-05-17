@@ -152,7 +152,13 @@ public:
   bool checkFlag(FlagType flag);
   bool isTargetReached();
 
-  //TODO interrupt configuration ; event handling
+  //TODO interrupt configuration
+  
+  /* Clear all events */
+  void clearEvents();
+  
+  /* Check event and clear it if necessary */
+  bool checkEvent(EventType event);
 
   /* Set step/dir outputs polarity
    * if stepInverted is true, LOW indicates an active step

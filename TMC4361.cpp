@@ -63,6 +63,11 @@ void TMC4361::begin(long clockFreq, int csPin, int intPin, int startPin, int rst
 
   writeRegister(TMC4361_CLK_FREQ_REGISTER, clockFreq);
   setOutputTimings(_defaultStepLength, _defaultDirSetupTime);
+  
+  // Protect all events from automatic clearing when reading EVENTS register. 
+  // This way individual events can be checked at the price of reading the register once per check.
+  writeRegister(TMC4361_EVENT_CLEAR_CONF_REGISTER, 0xFFFFFFFF);
+  clearEvents();
 
   //TODO init FREEZE register
 }
@@ -90,6 +95,21 @@ bool TMC4361::checkFlag(TMC4361::FlagType flag)
 bool TMC4361::isTargetReached()
 {
   return checkFlag(TARGET_REACHED_F);
+}
+
+void TMC4361::clearEvents()
+{
+  writeRegister(TMC4361_EVENTS_REGISTER, 0xFFFFFFFF);
+}
+
+bool TMC4361::checkEvent(EventType event)
+{
+  bool value = bitRead(readRegister(TMC4361_EVENTS_REGISTER), event);
+  
+  if (value)
+    writeRegister(TMC4361_EVENTS_REGISTER, 1 << event);
+    
+  return value;
 }
 
 void TMC4361::setOutputsPolarity(bool stepInverted, bool dirInverted)
