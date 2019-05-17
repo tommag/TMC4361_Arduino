@@ -113,7 +113,7 @@ public:
     ENC_VEL_ZERO,
     CL_MAX,
     CL_FIT,
-    STOP_ON_STALL,
+    STOP_ON_STALL_EV,
     MOTOR_EV,
     RST_EV
   };
@@ -137,6 +137,36 @@ public:
     ENC_FAIL_F,
     N_ACTIVE_F,
     ENC_LATCH_F,
+  };
+  
+  //Reference switch configuration register
+  enum ReferenceConfRegisterFields {
+    STOP_LEFT_EN = 0,
+    STOP_RIGHT_EN,
+    POL_STOP_LEFT,
+    POL_STOP_RIGHT,
+    INVERT_STOP_DIRECTION,
+    SOFT_STOP_EN,
+    VIRTUAL_LEFT_LIMIT_EN,
+    VIRTUAL_RIGHT_LIMIT_EN,
+    VIRT_STOP_MODE,
+    LATCH_X_ON_INACTIVE_L = 10,
+    LATCH_X_ON_ACTIVE_L,
+    LATCH_X_ON_INACTIVE_R,
+    LATCH_X_ON_ACTIVE_R,
+    STOP_LEFT_IS_HOME,
+    STOP_RIGHT_IS_HOME,
+    HOME_EVENT,
+    START_HOME_TRACKING = 20,
+    CLR_POS_AT_TARGET,
+    CIRCULAR_MOVEMENT_EN,
+    POS_COMP_OUTPUT,
+    POS_COMP_SOURCE = 25,
+    STOP_ON_STALL,
+    DRV_AFTER_STALL,
+    MODIFIED_POS_COMPARE,
+    AUTOMATIC_COVER = 30,
+    CIRCULAR_ENC_EN
   };
 
   TMC4361();
