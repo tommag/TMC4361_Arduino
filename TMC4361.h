@@ -242,6 +242,9 @@ public:
   /* Stop the current motion according to the set ramp mode and motion parameters. The max speed is set to 0 but the target position stays unchanged. */
   void stop();
 
+  void writeRegister(const byte address, const long data);
+  long readRegister(const byte address);
+
 private:
   const static int _defaultStepLength = 5; //us
   const static int _defaultDirSetupTime = 5; //us
@@ -256,8 +259,6 @@ private:
 
   SPISettings _spiSettings;
 
-  void writeRegister(const byte address, const long data);
-  long readRegister(const byte address);
   long spiTransfer(const byte address, const long data);
   long floatToFixedPoint(float value, int decimalPlaces);
   float fixedPointToFloat(long value, int decimalPlaces);
